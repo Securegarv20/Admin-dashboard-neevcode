@@ -1,4 +1,3 @@
-
 import { Button } from "@/components/ui/button";
 import {
   Table,
@@ -18,7 +17,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Edit, Plus, Trash2 } from "lucide-react";
+import { Edit, Plus, Trash2, X } from "lucide-react";
 import { useState } from "react";
 
 interface Course {
@@ -59,6 +58,8 @@ export default function Courses() {
     curriculum: []
   });
   const [curriculumInput, setCurriculumInput] = useState("");
+  const [editingCourse, setEditingCourse] = useState<Course | null>(null);
+  const [isEditingCourse, setIsEditingCourse] = useState(false);
 
   const handleAddCourse = () => {
     if (newCourse.name && newCourse.description && newCourse.price && newCourse.imageUrl) {
@@ -95,13 +96,29 @@ export default function Courses() {
     }
   };
 
+  const handleEditCourse = () => {
+    if (editingCourse && editingCourse.name && editingCourse.description && editingCourse.price && editingCourse.imageUrl) {
+      setCourses(courses.map(course => 
+        course.id === editingCourse.id ? editingCourse : course
+      ));
+      setEditingCourse(null);
+      setIsEditingCourse(false);
+    }
+  };
+
+  const startEditing = (course: Course) => {
+    setEditingCourse(course);
+    setIsEditingCourse(true);
+    setCurriculumInput("");
+  };
+
   return (
     <div className="p-8 space-y-8 animate-in">
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold tracking-tight">Courses</h1>
         <Dialog open={isAddingCourse} onOpenChange={setIsAddingCourse}>
           <DialogTrigger asChild>
-            <Button>
+            <Button className="bg-[#947dc2] hover:bg-[#947dc2]/90">
               <Plus className="mr-2 h-4 w-4" /> Add New Course
             </Button>
           </DialogTrigger>
@@ -172,8 +189,110 @@ export default function Courses() {
               <Button variant="outline" onClick={() => setIsAddingCourse(false)}>
                 Cancel
               </Button>
-              <Button onClick={handleAddCourse}>
+              <Button 
+                onClick={handleAddCourse}
+                className="bg-[#947dc2] hover:bg-[#947dc2]/90"
+              >
                 Add Course
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
+        <Dialog open={isEditingCourse} onOpenChange={setIsEditingCourse}>
+          <DialogContent className="sm:max-w-[625px]">
+            <DialogHeader>
+              <DialogTitle>Edit Course</DialogTitle>
+            </DialogHeader>
+            {editingCourse && (
+              <div className="grid gap-4 py-4">
+                <div className="grid gap-2">
+                  <Label htmlFor="edit-name">Course Name</Label>
+                  <Input
+                    id="edit-name"
+                    value={editingCourse.name}
+                    onChange={(e) => setEditingCourse({ ...editingCourse, name: e.target.value })}
+                  />
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="edit-description">Description</Label>
+                  <Textarea
+                    id="edit-description"
+                    value={editingCourse.description}
+                    onChange={(e) => setEditingCourse({ ...editingCourse, description: e.target.value })}
+                  />
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="edit-price">Price (₹)</Label>
+                  <Input
+                    id="edit-price"
+                    type="number"
+                    value={editingCourse.price}
+                    onChange={(e) => setEditingCourse({ ...editingCourse, price: Number(e.target.value) })}
+                  />
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="edit-image">Image URL</Label>
+                  <Input
+                    id="edit-image"
+                    value={editingCourse.imageUrl}
+                    onChange={(e) => setEditingCourse({ ...editingCourse, imageUrl: e.target.value })}
+                  />
+                </div>
+                <div className="grid gap-2">
+                  <Label>Curriculum Topics</Label>
+                  <div className="flex gap-2">
+                    <Input
+                      value={curriculumInput}
+                      onChange={(e) => setCurriculumInput(e.target.value)}
+                      placeholder="Add a topic"
+                    />
+                    <Button 
+                      type="button" 
+                      onClick={() => {
+                        if (curriculumInput.trim()) {
+                          setEditingCourse({
+                            ...editingCourse,
+                            curriculum: [...editingCourse.curriculum, curriculumInput.trim()]
+                          });
+                          setCurriculumInput("");
+                        }
+                      }}
+                    >
+                      Add Topic
+                    </Button>
+                  </div>
+                  {editingCourse.curriculum.length > 0 && (
+                    <ul className="list-disc list-inside space-y-1">
+                      {editingCourse.curriculum.map((topic, index) => (
+                        <li key={index} className="text-sm">
+                          {topic}
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-4 w-4 ml-2"
+                            onClick={() => setEditingCourse({
+                              ...editingCourse,
+                              curriculum: editingCourse.curriculum.filter((_, i) => i !== index)
+                            })}
+                          >
+                            <X className="h-3 w-3" />
+                          </Button>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+              </div>
+            )}
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setIsEditingCourse(false)}>
+                Cancel
+              </Button>
+              <Button 
+                onClick={handleEditCourse}
+                className="bg-[#947dc2] hover:bg-[#947dc2]/90"
+              >
+                Save Changes
               </Button>
             </div>
           </DialogContent>
@@ -200,7 +319,11 @@ export default function Courses() {
                 <TableCell>{course.curriculum.join(", ")}</TableCell>
                 <TableCell>
                   <div className="flex items-center gap-2">
-                    <Button variant="ghost" size="icon">
+                    <Button 
+                      variant="ghost" 
+                      size="icon"
+                      onClick={() => startEditing(course)}
+                    >
                       <Edit className="h-4 w-4" />
                     </Button>
                     <Button 

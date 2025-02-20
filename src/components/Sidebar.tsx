@@ -13,17 +13,17 @@ const menuItems = [
 
 export function Sidebar() {
   const location = useLocation();
-  const [isCollapsed, setIsCollapsed] = useState(false);
+  const [isCollapsed, setIsCollapsed] = useState(true);
 
   return (
     <div 
       className={cn(
-        "min-h-screen bg-card border-r flex flex-col transition-all duration-300",
+        "min-h-screen bg-white border-r flex flex-col transition-all duration-300",
         isCollapsed ? "w-16" : "w-64"
       )}
     >
       <div className="p-4 flex items-center justify-between border-b">
-        {!isCollapsed && <h2 className="text-xl font-bold text-primary">NeevCode</h2>}
+        {!isCollapsed && <h2 className="text-xl font-bold text-[#947dc2]">NeevCode</h2>}
         <Button
           variant="ghost"
           size="icon"
@@ -44,8 +44,8 @@ export function Sidebar() {
               className={cn(
                 "flex items-center space-x-2 px-4 py-2 rounded-lg transition-colors my-1",
                 isActive
-                  ? "bg-primary/10 text-primary"
-                  : "hover:bg-muted text-muted-foreground hover:text-foreground"
+                  ? "bg-[#d0c3f1] text-[#0b6380]"
+                  : "hover:bg-[#d0c3f1]/10 text-muted-foreground hover:text-foreground"
               )}
             >
               <Icon className="h-5 w-5 shrink-0" />
